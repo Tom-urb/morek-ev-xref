@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOREK EV — AC Charging Cross-Reference</title>
+<style>
+  :root {
+    --green: #00a651;
+    --green-dark: #007a3d;
+    --green-light: #e6f7ee;
+    --green-mid: #c3ecd5;
+    --dark: #1a1a2e;
+    --dark2: #16213e;
+    --grey: #4a4a5a;
+    --grey2: #6b7280;
+    --grey3: #9ca3af;
+    --border: #e5e7eb;
+    --bg: #f8fafc;
+    --white: #ffffff;
+    --yellow: #fef3c7;
+    --yellow-border: #f59e0b;
+    --red: #fee2e2;
+    --red-border: #ef4444;
+    --blue: #eff6ff;
+    --blue-border: #3b82f6;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--dark2) 0%, #0d2137 100%);
+    color: white;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 64px;
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 16px; color: white;
+    letter-spacing: -1px; flex-shrink: 0;
+  }
+
+  .header-title {
+    flex: 1;
+  }
+  .header-title h1 {
+    font-size: 17px; font-weight: 700; letter-spacing: 0.3px;
+    color: white;
+  }
+  .header-title p {
+    font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 1px;
+  }
+
+  .header-badge {
+    background: rgba(0,166,81,0.2);
+    border: 1px solid rgba(0,166,81,0.4);
+    color: #4ade80;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+  }
+
+  /* TABS */
+  .tabs-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    gap: 0;
+    position: sticky;
+    top: 64px;
+    z-index: 99;
+  }
+
+  .tab-btn {
+    padding: 14px 20px;
+    font-size: 13px; font-weight: 600;
+    color: var(--grey2);
+    background: none; border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .tab-btn:hover { color: var(--green-dark); }
+  .tab-btn.active {
+    color: var(--green-dark);
+    border-bottom-color: var(--green);
+  }
+  .tab-count {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 10px; font-weight: 700;
+    padding: 2px 6px; border-radius: 10px;
+  }
+
+  /* MAIN */
+  main { padding: 24px 28px; max-width: 1400px; margin: 0 auto; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* SEARCH BAR */
+  .search-row {
+    display: flex; gap: 10px; align-items: center;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative; flex: 1; min-width: 240px;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--grey3); pointer-events: none;
+  }
+  .search-input {
+    width: 100%; padding: 9px 12px 9px 36px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px; outline: none;
+    background: var(--white);
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--green); }
+
+  .filter-select {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px; background: var(--white);
+    outline: none; cursor: pointer;
+    color: var(--dark);
+    transition: border-color 0.15s;
+  }
+  .filter-select:focus { border-color: var(--green); }
+
+  .results-info {
+    font-size: 12px; color: var(--grey3);
+    margin-bottom: 14px;
+  }
+  .results-info strong { color: var(--grey); }
+
+  /* CROSS-REF TABLE */
+  .table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: var(--dark2);
+    color: rgba(255,255,255,0.85);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    white-space: nowrap;
+  }
+  thead th:first-child { border-radius: 0; }
+
+  .brand-header {
+    background: var(--dark);
+    color: rgba(255,255,255,0.4);
+    padding: 6px 14px;
+    font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.5px;
+  }
+  .brand-header td { padding: 7px 14px; }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+
+  td { padding: 11px 14px; vertical-align: middle; }
+
+  .brand-chip {
+    display: inline-flex; align-items: center;
+    padding: 3px 8px; border-radius: 5px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.3px; white-space: nowrap;
+  }
+  .brand-schrack { background: #fef9c3; color: #854d0e; }
+  .brand-abb { background: #fee2e2; color: #991b1b; }
+  .brand-schneider { background: #ede9fe; color: #5b21b6; }
+  .brand-mybox { background: #dbeafe; color: #1e40af; }
+
+  .order-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px; font-weight: 700;
+    color: var(--dark); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 7px; border-radius: 5px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .order-code:hover { background: var(--green-light); border-color: var(--green-mid); }
+  .order-code .copy-icon { color: var(--grey3); width: 11px; height: 11px; }
+
+  .power-badge {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 700;
+    background: var(--green-light); color: var(--green-dark);
+    white-space: nowrap;
+  }
+
+  .connector-badge {
+    font-size: 11px; font-weight: 600;
+    color: var(--grey);
+    white-space: nowrap;
+  }
+
+  .feat-yes {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--green-light); color: var(--green-dark);
+    font-size: 11px; font-weight: 700;
+  }
+  .feat-opt {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--yellow); color: #92400e;
+    font-size: 10px; font-weight: 700;
+  }
+  .feat-no {
+    color: var(--grey3); font-size: 14px; display: inline-block; text-align: center; width: 20px;
+  }
+
+  .ip-badge {
+    font-size: 11px; font-weight: 700; color: var(--grey2);
+  }
+
+  /* MOREK equivalent cell */
+  .morek-equiv {
+    background: var(--green-light);
+    border-left: 3px solid var(--green);
+    padding: 9px 12px !important;
+  }
+  .morek-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px; font-weight: 800; color: var(--green-dark);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 6px; border-radius: 4px;
+    background: white;
+    border: 1px solid var(--green-mid);
+  }
+  .morek-code:hover { background: var(--green-mid); }
+  .morek-product-name {
+    font-size: 11px; color: var(--green-dark); margin-top: 3px; opacity: 0.8;
+  }
+  .star-badge {
+    color: var(--yellow-border); font-size: 12px; margin-left: 3px;
+  }
+
+  /* NO RESULTS */
+  .no-results {
+    text-align: center; padding: 60px 20px;
+    color: var(--grey3);
+  }
+  .no-results svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .no-results p { font-size: 14px; }
+
+  /* MOREK PRODUCTS GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+
+  .product-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s, border-color 0.15s;
+    cursor: default;
+  }
+  .product-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--green-mid);
+  }
+  .product-card.star-card {
+    border-color: var(--green-mid);
+    background: linear-gradient(135deg, var(--white) 0%, var(--green-light) 100%);
+  }
+
+  .card-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 12px; gap: 8px;
+  }
+  .card-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px; font-weight: 800;
+    color: var(--green-dark);
+    cursor: pointer;
+    padding: 4px 8px;
+    background: var(--green-light);
+    border-radius: 5px; border: 1px solid var(--green-mid);
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .card-code:hover { background: var(--green-mid); }
+
+  .card-power {
+    background: var(--dark2); color: white;
+    font-size: 13px; font-weight: 800;
+    padding: 4px 10px; border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .card-name {
+    font-size: 14px; font-weight: 700; color: var(--dark);
+    margin-bottom: 10px; line-height: 1.3;
+  }
+
+  .card-specs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 12px;
+  }
+  .spec-chip {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 5px;
+    background: var(--bg); color: var(--grey);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .spec-chip.green { background: var(--green-light); color: var(--green-dark); border-color: var(--green-mid); }
+  .spec-chip.blue { background: var(--blue); color: #1e40af; border-color: #bfdbfe; }
+  .spec-chip.dark { background: var(--dark2); color: rgba(255,255,255,0.8); border-color: transparent; }
+
+  .card-notes {
+    font-size: 11px; color: var(--grey2);
+    line-height: 1.5; border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--grey3);
+    margin: 20px 0 10px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+
+  /* SPEC COMPARISON */
+  .spec-table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    border: 1px solid var(--border);
+  }
+
+  .spec-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+
+  .spec-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .spec-table thead th:first-child {
+    background: var(--dark2);
+    color: rgba(255,255,255,0.7);
+    width: 200px;
+  }
+  .spec-table thead th.morek-col {
+    background: var(--green-dark);
+    color: white;
+    font-size: 12px;
+  }
+  .spec-table thead th.comp-col {
+    background: #334155;
+    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+  }
+  .spec-table thead th.notes-col {
+    background: #1e293b;
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    font-style: italic;
+  }
+
+  .spec-section-row td {
+    background: var(--bg);
+    color: var(--grey3);
+    font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    padding: 7px 16px;
+    border-top: 2px solid var(--border);
+  }
+
+  .spec-table tbody tr:not(.spec-section-row) { border-bottom: 1px solid var(--border); }
+  .spec-table tbody tr:not(.spec-section-row):hover td { background: #f0fdf4; }
+
+  .spec-table td {
+    padding: 10px 16px;
+    vertical-align: top;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .spec-table td:first-child {
+    font-weight: 600; color: var(--grey);
+    font-size: 12px; background: var(--bg);
+  }
+  .spec-table td.morek-val {
+    font-weight: 700; color: var(--green-dark);
+    background: var(--green-light);
+  }
+  .spec-table td.notes-val {
+    font-size: 11px; color: var(--grey3);
+    font-style: italic; background: var(--bg);
+    max-width: 160px;
+  }
+  .spec-table td.notes-val.highlight {
+    color: var(--green-dark); font-style: normal; font-weight: 600;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--dark2); color: white;
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-md);
+    display: flex; align-items: center; gap: 8px;
+    transform: translateY(60px); opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+  /* FOOTNOTE */
+  .footnote {
+    font-size: 11px; color: var(--grey3);
+    margin-top: 14px; line-height: 1.6;
+  }
+  .footnote strong { color: var(--yellow-border); }
+
+  /* FILTER ROW */
+  .filter-chips {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .filter-chip {
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--white); color: var(--grey);
+    transition: all 0.15s;
+  }
+  .filter-chip:hover { border-color: var(--green); color: var(--green-dark); }
+  .filter-chip.active {
+    background: var(--green-dark); color: white; border-color: var(--green-dark);
+  }
+  .filter-chip.all.active { background: var(--dark2); border-color: var(--dark2); }
+
+  @media (max-width: 700px) {
+    header { padding: 0 16px; }
+    main { padding: 16px; }
+    .tabs-bar { padding: 0 12px; }
+    .tab-btn { padding: 12px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">M</div>
+  <div class="header-title">
+    <h1>MOREK EV — AC Charging Cross-Reference</h1>
+    <p>Charge Forward · 7.4 – 22 kW · ev.morek.eu</p>
+  </div>
+  <span class="header-badge">2025 / 2026</span>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('xref', this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    Cross-Reference
+    <span class="tab-count" id="xref-count">14</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('products', this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+    MOREK Products
+    <span class="tab-count">11</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('specs', this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2 2h-2a2 2 0 0 1-2-2z"/></svg>
+    Spec Comparison
+  </button>
+</div>
+
+<main>
+
+<!-- ===== CROSS-REFERENCE TAB ===== -->
+<div class="tab-panel active" id="tab-xref">
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" type="text" id="xref-search" placeholder="Hledat dle kódu, názvu, nebo MOREK ekvivalentu…" oninput="filterXref()">
+    </div>
+    <select class="filter-select" id="xref-brand" onchange="filterXref()">
+      <option value="">Všichni výrobci</option>
+      <option value="Schrack">Schrack</option>
+      <option value="ABB">ABB</option>
+      <option value="Schneider">Schneider Electric</option>
+      <option value="MyBox">MyBox</option>
+    </select>
+    <select class="filter-select" id="xref-power" onchange="filterXref()">
+      <option value="">Všechny výkony</option>
+      <option value="7.4">7.4 kW</option>
+      <option value="11">11 kW</option>
+      <option value="22">22 kW</option>
+    </select>
+  </div>
+  <div class="results-info" id="xref-info">Zobrazeno <strong>14</strong> z 14 produktů</div>
+
+  <div class="table-wrap">
+    <table id="xref-table">
+      <thead>
+        <tr>
+          <th>Výrobce</th>
+          <th>Kód produktu</th>
+          <th>Název / typ</th>
+          <th>Výkon</th>
+          <th>Konektor</th>
+          <th>Kabel</th>
+          <th>RFID</th>
+          <th>IP</th>
+          <th colspan="2" style="background: var(--green-dark);">⇒ MOREK Ekvivalent</th>
+        </tr>
+      </thead>
+      <tbody id="xref-tbody"></tbody>
+    </table>
+  </div>
+  <div class="footnote" style="margin-top:14px;">
+    <strong>★ Primární referenční produkty:</strong> MEV11DREWN6T2 · MEV22DREWN6T2 · MEV11DREW6NT2 (potvrzené náhradní kódy, květen 2026).
+    Konkurenční data: schrack.cz · new.abb.com/ev-charging · se.com · mybox.eco. Před nabídkou ověřte dostupnost.
+  </div>
+</div>
+
+<!-- ===== MOREK PRODUCTS TAB ===== -->
+<div class="tab-panel" id="tab-products">
+  <div class="filter-chips" id="product-filters">
+    <button class="filter-chip all active" onclick="filterProducts('all', this)">Všechny (11)</button>
+    <button class="filter-chip" onclick="filterProducts('cable', this)">📟 S kabelem</button>
+    <button class="filter-chip" onclick="filterProducts('socket', this)">🔌 Socket</button>
+    <button class="filter-chip" onclick="filterProducts('4g', this)">📶 4G / LTE</button>
+    <button class="filter-chip" onclick="filterProducts('7.4', this)">7.4 kW</button>
+    <button class="filter-chip" onclick="filterProducts('11', this)">11 kW</button>
+    <button class="filter-chip" onclick="filterProducts('22', this)">22 kW</button>
+  </div>
+  <div id="products-grid-wrap"></div>
+  <div class="footnote" style="margin-top:16px;">
+    Všechna AC zařízení MOREK: Mode 3 · Level 2 · IEC 61851 / CE · Integrovaný Type B RCD (AC 30 mA + DC 6 mA) · OCPP 1.6J (2.0 ready) · DLM · Kabel Phoenix Contact · −30 až +50 °C · 389×203×110 mm
+  </div>
+</div>
+
+<!-- ===== SPEC COMPARISON TAB ===== -->
+<div class="tab-panel" id="tab-specs">
+  <div class="spec-table-wrap">
+    <table class="spec-table" id="spec-table">
+      <thead>
+        <tr>
+          <th>Parametr</th>
+          <th class="morek-col">MOREK<br><span style="font-weight:400;font-size:10px;opacity:0.8">Charge Forward</span></th>
+          <th class="comp-col">Schrack<br><span style="font-weight:400;font-size:10px;opacity:0.7">i-CHARGE</span></th>
+          <th class="comp-col">ABB<br><span style="font-weight:400;font-size:10px;opacity:0.7">Terra AC</span></th>
+          <th class="comp-col">Schneider<br><span style="font-weight:400;font-size:10px;opacity:0.7">EVlink Pro AC</span></th>
+          <th class="comp-col">MyBox<br><span style="font-weight:400;font-size:10px;opacity:0.7">HOME 2nd gen</span></th>
+          <th class="notes-col">Poznámka</th>
+        </tr>
+      </thead>
+      <tbody id="spec-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast">
+  <span class="toast-dot"></span>
+  <span id="toast-msg">Zkopírováno!</span>
+</div>
+
+<script>
+// ====== DATA ======
+const xrefData = [
+  { brand: 'Schrack', code: 'EMCION22C',       name: 'i-CHARGE CION 11–22 kW, Type 2, RCMU',       power: '11/22', connector: 'Socket T2',  cable: '—', rfid: '—',    ip: 'IP44', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'Schrack', code: 'EMCION22CR',       name: 'i-CHARGE CION 11–22 kW, Type 2, RFID, RCMU', power: '11/22', connector: 'Socket T2',  cable: '—', rfid: 'RFID', ip: 'IP44', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'Schrack', code: 'EMHOM413B',        name: 'i-CHARGE HOME Eco 11 kW, Type 2, SS, RCD EV', power: '11',   connector: 'Socket T2',  cable: '—', rfid: '—',    ip: 'IP44', morekCode: 'MEV11DREW6NT2',  morekName: 'Morek EV 11 kW Socket ★' },
+  { brand: 'Schrack', code: 'EMPUBW16',         name: 'Nabíjecí stanice Type 2, 22 kW',             power: '22',   connector: 'Socket T2',  cable: '—', rfid: '—',    ip: 'IP54', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'ABB',     code: 'TAC-W7-T-0',       name: 'Terra AC Wallbox 7.4 kW, Type 2 socket',     power: '7.4',  connector: 'Socket T2',  cable: '—', rfid: '—',    ip: 'IP54', morekCode: 'MEV07DREWN6T2',  morekName: 'Morek EV 7.4 kW Cable 6.5 m' },
+  { brand: 'ABB',     code: 'TAC-W7-T-R-0',     name: 'Terra AC Wallbox 7.4 kW, Type 2 socket, RFID', power: '7.4', connector: 'Socket T2', cable: '—', rfid: 'RFID', ip: 'IP54', morekCode: 'MEV07DREWN6T2',  morekName: 'Morek EV 7.4 kW Cable 6.5 m' },
+  { brand: 'ABB',     code: 'TAC-W22-T-0',      name: 'Terra AC Wallbox 22 kW, Type 2 socket',      power: '22',   connector: 'Socket T2',  cable: '—', rfid: '—',    ip: 'IP54', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'ABB',     code: 'TAC-W22-T-R-0',    name: 'Terra AC Wallbox 22 kW, Type 2 socket, RFID', power: '22',  connector: 'Socket T2',  cable: '—', rfid: 'RFID', ip: 'IP54', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'Schneider', code: 'EVB1S7K4AC',     name: 'EVlink Pro AC 7.4 kW, 1-phase, T2S socket',  power: '7.4',  connector: 'Socket T2S', cable: '—', rfid: '—',    ip: 'IP55', morekCode: 'MEV07DREWN6T2',  morekName: 'Morek EV 7.4 kW Cable 6.5 m' },
+  { brand: 'Schneider', code: 'EVB3S22NC0',     name: 'EVlink Pro AC 22 kW, 3-phase, T2S socket',   power: '22',   connector: 'Socket T2S', cable: '—', rfid: '—',    ip: 'IP55', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'Schneider', code: 'EVB3S22N4',      name: 'EVlink Pro AC 22 kW, 3P+N, T2S, RDC-DD 6 mA', power: '22', connector: 'Socket T2S', cable: '—', rfid: '—',    ip: 'IP55', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'Schneider', code: 'EVB3S22N4A',     name: 'EVlink Pro AC 22 kW, 3P+N, T2S, RDC-DD + RCD', power: '22', connector: 'Socket T2S', cable: '—', rfid: '—',   ip: 'IP55', morekCode: 'MEV22DREWNNT2',  morekName: 'Morek EV 22 kW Socket' },
+  { brand: 'MyBox',   code: 'EL-MB-HOME1-C',    name: 'MyBox HOME 11 kW 2nd gen, cable T2, 5 m',    power: '11',   connector: 'Cable T2',   cable: '5 m', rfid: 'opt.', ip: 'IP44', morekCode: 'MEV11DREWN6T2', morekName: 'Morek EV 11 kW Cable 6.5 m ★' },
+  { brand: 'MyBox',   code: 'EL-MB-HOME2-C',    name: 'MyBox HOME 22 kW 2nd gen, cable T2, 5 m',    power: '22',   connector: 'Cable T2',   cable: '5 m', rfid: 'opt.', ip: 'IP44', morekCode: 'MEV22DREWN6T2', morekName: 'Morek EV 22 kW Cable 6.5 m ★' },
+];
+
+const morekProducts = [
+  { code: 'MEV07DREWN6T2',  name: 'Morek EV 7.4 kW — Kabel 6.5 m',         power: '7.4', connector: 'Cable T2',   cable: '6.5 m', rfid: true, g4: false, ip: 'IP55', star: false, notes: 'WiFi · LAN · RFID · BT · LCD 3.8" · OCPP 1.6J · IK08' },
+  { code: 'MEV11DREWN6T2',  name: 'Morek EV 11 kW — Kabel 6.5 m',          power: '11',  connector: 'Cable T2',   cable: '6.5 m', rfid: true, g4: false, ip: 'IP55', star: true,  notes: 'WiFi · LAN · RFID · BT · LCD 3.8" · OCPP 1.6J · IK08' },
+  { code: 'MEV22DREWN6T2',  name: 'Morek EV 22 kW — Kabel 6.5 m',          power: '22',  connector: 'Cable T2',   cable: '6.5 m', rfid: true, g4: false, ip: 'IP55', star: true,  notes: 'WiFi · LAN · RFID · BT · LCD 3.8" · OCPP 1.6J · IK08' },
+  { code: 'MEV07DREWG6T2',  name: 'Morek EV 7.4 kW — Kabel 6.5 m + 4G',   power: '7.4', connector: 'Cable T2',   cable: '6.5 m', rfid: true, g4: true,  ip: 'IP55', star: false, notes: 'Jako MEV07DREWN6T2 + integrovaný 4G modem' },
+  { code: 'MEV11DREWG6T2',  name: 'Morek EV 11 kW — Kabel 6.5 m + 4G',    power: '11',  connector: 'Cable T2',   cable: '6.5 m', rfid: true, g4: true,  ip: 'IP55', star: false, notes: 'Jako MEV11DREWN6T2 + integrovaný 4G modem' },
+  { code: 'MEV22DREWG6T2',  name: 'Morek EV 22 kW — Kabel 6.5 m + 4G',    power: '22',  connector: 'Cable T2',   cable: '6.5 m', rfid: true, g4: true,  ip: 'IP55', star: false, notes: 'Jako MEV22DREWN6T2 + integrovaný 4G modem' },
+  { code: 'MEV11DREW6NT2',  name: 'Morek EV 11 kW — Socket',                power: '11',  connector: 'Socket T2',  cable: '—',     rfid: true, g4: false, ip: 'IP55', star: true,  notes: 'Socket verze · potvrzený náhradní kód (květen 2026) · max 16 A / 11 kW' },
+  { code: 'MEV22DREWNNT2',  name: 'Morek EV 22 kW — Socket',                power: '22',  connector: 'Socket T2',  cable: '—',     rfid: true, g4: false, ip: 'IP55', star: false, notes: 'Socket verze (bez kabelu) · max 32 A / 22 kW' },
+  { code: 'MEV22DREWGNT2',  name: 'Morek EV 22 kW — Socket + 4G',          power: '22',  connector: 'Socket T2',  cable: '—',     rfid: true, g4: true,  ip: 'IP55', star: false, notes: 'Socket + integrovaný 4G modem' },
+  { code: 'MEV22DREWNNT2S', name: 'Morek EV 22 kW — Socket se závěrkou',    power: '22',  connector: 'Socket T2S', cable: '—',     rfid: true, g4: false, ip: 'IP55', star: false, notes: 'Type 2 socket s bezpečnostní závěrkou' },
+  { code: 'MEV22DREWGNT2S', name: 'Morek EV 22 kW — Socket se závěrkou + 4G', power: '22', connector: 'Socket T2S', cable: '—',  rfid: true, g4: true,  ip: 'IP55', star: false, notes: 'Type 2 socket se závěrkou + integrovaný 4G modem' },
+];
+
+const specData = [
+  { section: 'ELEKTRICKÉ PARAMETRY' },
+  { param: 'Max. výkon',          morek: '7.4 / 11 / 22 kW', schrack: '11 / 22 kW',       abb: '7.4 / 22 kW',         schneider: '7.4 / 11 / 22 kW', mybox: '11 / 22 kW',    note: 'MOREK pokrývá celý rozsah', noteHighlight: true },
+  { param: 'Max. proud',          morek: '16 A (11 kW)\n32 A (22 kW)', schrack: '16 A / 32 A', abb: '16 A / 32 A',    schneider: '16 A / 32 A',      mybox: '16 A / 32 A',   note: '' },
+  { param: 'Fáze napájení',       morek: '1-fázové (7.4 kW)\n3-fázové (11 a 22 kW)', schrack: '3-fázové', abb: '1-f. (7.4)\n3-f. (22)', schneider: '1-f. (7.4)\n3-f.', mybox: '3-fázové', note: '' },
+  { param: 'Režim nabíjení',      morek: 'Mode 3 / Level 2', schrack: 'Mode 3',            abb: 'Mode 3',              schneider: 'Mode 3',           mybox: 'Mode 3',         note: '' },
+  { section: 'KONEKTOR A KABEL' },
+  { param: 'Typy konektoru',      morek: 'Kabel T2\nnebo Socket T2 / T2S', schrack: 'Socket T2', abb: 'Socket T2',  schneider: 'Socket T2S',       mybox: 'Kabel T2',       note: 'MOREK: nejširší výběr', noteHighlight: true },
+  { param: 'Délka kabelu',        morek: '6.5 m\n(Phoenix Contact)', schrack: '— pouze socket', abb: '— pouze socket', schneider: '— pouze socket', mybox: '5 m',            note: 'MOREK: prémiový kabel 6.5 m', noteHighlight: true },
+  { section: 'KONEKTIVITA A SMART FUNKCE' },
+  { param: 'Integrovaná konektivita', morek: 'WiFi · LAN\nRFID · BT', schrack: 'RFID (vybr. mdl.)', abb: 'WiFi · BT · RFID', schneider: 'WiFi · BT · RFID', mybox: 'WiFi\n(RFID opt.)', note: '' },
+  { param: '4G / LTE možnost',    morek: 'Ano\n(G-varianty)',         schrack: '—',               abb: 'Vybrané varianty',    schneider: '—',                mybox: '—',              note: 'Unikátní 4G varianty MOREK', noteHighlight: true },
+  { param: 'Displej',             morek: 'LCD 3.8"',                  schrack: 'LED indikátory',  abb: '—',                   schneider: 'LED indikátory',   mybox: 'LED indikátory', note: 'MOREK: plný LCD displej', noteHighlight: true },
+  { param: 'OCPP protokol',       morek: '1.6J\n(OCPP 2.0 ready)',    schrack: '—',               abb: 'OCPP 1.6J',           schneider: 'OCPP 1.6J',        mybox: '1.6J via SW',    note: '' },
+  { param: 'DLM podpora',         morek: 'Ano\n(CT není součástí)',   schrack: '—',               abb: 'Externě',             schneider: 'Externě',          mybox: 'Volitelný modul',note: '' },
+  { section: 'OCHRANA A BEZPEČNOST' },
+  { param: 'IP stupeň',           morek: 'IP55',                      schrack: 'IP44',            abb: 'IP54',                schneider: 'IP55',             mybox: 'IP44',           note: 'MOREK a SE nejlepší ve třídě', noteHighlight: true },
+  { param: 'IK stupeň',           morek: 'IK08',                      schrack: '—',               abb: 'IK10',                schneider: 'IK10',             mybox: 'IK10',           note: '' },
+  { param: 'Ochrana proti úniku', morek: 'Type B integrovaný\nAC 30 mA + DC 6 mA', schrack: 'RCMU / opt. RCD', abb: 'Integrovaný', schneider: 'RDC-DD 6 mA integr.', mybox: 'Ext. RCD nutný', note: 'MOREK a SE: integrovaný', noteHighlight: true },
+  { section: 'PROVOZNÍ PODMÍNKY' },
+  { param: 'Provozní teplota',    morek: '−30 až +50 °C',             schrack: '—',               abb: '−25 až +50 °C',       schneider: '−25 až +50 °C',    mybox: '−25 až +45 °C', note: 'MOREK: nejširší rozsah', noteHighlight: true },
+  { param: 'Skladovací teplota',  morek: '−40 až +75 °C',             schrack: '—',               abb: '—',                   schneider: '—',                mybox: '—',              note: '' },
+  { section: 'CERTIFIKACE A ZÁRUKA' },
+  { param: 'Certifikace',         morek: 'CE · IEC 61851',            schrack: 'CE',              abb: 'CE · IEC 61851',      schneider: 'CE · IEC 61851',   mybox: 'CE',             note: '' },
+  { param: 'Záruka',              morek: 'Až 5 let\n(rozšířená opt.)',schrack: 'Standardní',      abb: 'Standardní',          schneider: 'Standardní',       mybox: 'Standardní',     note: 'MOREK: rozšířená možnost', noteHighlight: true },
+];
+
+// ====== BRAND CHIP COLORS ======
+function brandChip(brand) {
+  const cls = {
+    'Schrack': 'brand-schrack',
+    'ABB': 'brand-abb',
+    'Schneider': 'brand-schneider',
+    'MyBox': 'brand-mybox',
+  }[brand] || '';
+  const label = brand === 'Schneider' ? 'Schneider Electric' : brand;
+  return `<span class="brand-chip ${cls}">${label}</span>`;
+}
+
+function featBadge(v) {
+  if (v === 'RFID' || v === 'Yes') return `<span class="feat-yes">✓</span>`;
+  if (v === 'opt.') return `<span class="feat-opt">opt</span>`;
+  return `<span class="feat-no">—</span>`;
+}
+
+// ====== RENDER CROSS-REF ======
+function renderXref(data) {
+  const tbody = document.getElementById('xref-tbody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="no-results">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>Žádné výsledky. Zkuste jiný hledaný výraz.</p>
+    </div></td></tr>`;
+    return;
+  }
+
+  let html = '';
+  let lastBrand = '';
+  data.forEach(row => {
+    if (row.brand !== lastBrand) {
+      lastBrand = row.brand;
+      const label = row.brand === 'Schneider' ? 'SCHNEIDER ELECTRIC' : row.brand.toUpperCase();
+      html += `<tr class="brand-header"><td colspan="10">${label}</td></tr>`;
+    }
+    const isStar = row.morekName.includes('★');
+    html += `<tr>
+      <td>${brandChip(row.brand)}</td>
+      <td><span class="order-code" onclick="copyCode('${row.code}')">${row.code}<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span></td>
+      <td style="max-width:220px;font-size:12px;color:var(--grey)">${row.name}</td>
+      <td><span class="power-badge">${row.power} kW</span></td>
+      <td><span class="connector-badge">${row.connector}</span></td>
+      <td style="font-size:12px;color:var(--grey2)">${row.cable}</td>
+      <td>${featBadge(row.rfid)}</td>
+      <td><span class="ip-badge">${row.ip}</span></td>
+      <td class="morek-equiv">
+        <span class="morek-code" onclick="copyCode('${row.morekCode}')">${row.morekCode}<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+        <div class="morek-product-name">${row.morekName.replace('★', '')}</div>
+      </td>
+      <td class="morek-equiv" style="text-align:center">
+        ${isStar ? '<span class="star-badge" title="Primární referenční produkt">★</span>' : ''}
+      </td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+  document.getElementById('xref-info').innerHTML = `Zobrazeno <strong>${data.length}</strong> z ${xrefData.length} produktů`;
+  document.getElementById('xref-count').textContent = data.length;
+}
+
+function filterXref() {
+  const q = document.getElementById('xref-search').value.toLowerCase();
+  const brand = document.getElementById('xref-brand').value;
+  const power = document.getElementById('xref-power').value;
+
+  const filtered = xrefData.filter(row => {
+    const matchQ = !q || row.code.toLowerCase().includes(q) || row.name.toLowerCase().includes(q) || row.morekCode.toLowerCase().includes(q) || row.morekName.toLowerCase().includes(q);
+    const matchBrand = !brand || row.brand === brand || (brand === 'Schneider' && row.brand === 'Schneider');
+    const matchPower = !power || row.power === power || row.power.includes(power);
+    return matchQ && matchBrand && matchPower;
+  });
+  renderXref(filtered);
+}
+
+// ====== RENDER MOREK PRODUCTS ======
+function renderProducts(filter) {
+  const wrap = document.getElementById('products-grid-wrap');
+  let data = morekProducts;
+  if (filter === 'cable')   data = data.filter(p => p.connector.startsWith('Cable'));
+  if (filter === 'socket')  data = data.filter(p => p.connector.startsWith('Socket'));
+  if (filter === '4g')      data = data.filter(p => p.g4);
+  if (filter === '7.4')     data = data.filter(p => p.power === '7.4');
+  if (filter === '11')      data = data.filter(p => p.power === '11');
+  if (filter === '22')      data = data.filter(p => p.power === '22');
+
+  if (!data.length) { wrap.innerHTML = '<p style="color:var(--grey3);padding:30px 0">Žádné produkty odpovídají filtru.</p>'; return; }
+
+  let html = '<div class="products-grid">';
+  data.forEach(p => {
+    const starClass = p.star ? 'star-card' : '';
+    const specs = [];
+    specs.push(`<span class="spec-chip dark">${p.power} kW</span>`);
+    specs.push(`<span class="spec-chip">${p.connector}</span>`);
+    if (p.cable !== '—') specs.push(`<span class="spec-chip">🔌 ${p.cable}</span>`);
+    if (p.rfid)  specs.push(`<span class="spec-chip green">RFID ✓</span>`);
+    if (p.g4)    specs.push(`<span class="spec-chip blue">4G / LTE</span>`);
+    specs.push(`<span class="spec-chip">${p.ip}</span>`);
+
+    html += `<div class="product-card ${starClass}">
+      <div class="card-header">
+        <span class="card-code" onclick="copyCode('${p.code}')">${p.star ? '★ ' : ''}${p.code}<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+        <span class="card-power">${p.power} kW</span>
+      </div>
+      <div class="card-name">${p.name}</div>
+      <div class="card-specs">${specs.join('')}</div>
+      <div class="card-notes">${p.notes}</div>
+    </div>`;
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function filterProducts(filter, btn) {
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts(filter);
+}
+
+// ====== RENDER SPEC COMPARISON ======
+function renderSpecs() {
+  const tbody = document.getElementById('spec-tbody');
+  let html = '';
+  specData.forEach(row => {
+    if (row.section) {
+      html += `<tr class="spec-section-row"><td colspan="7">${row.section}</td></tr>`;
+      return;
+    }
+    const hl = row.noteHighlight ? 'highlight' : '';
+    html += `<tr>
+      <td>${row.param}</td>
+      <td class="morek-val">${row.morek.replace(/\n/g,'<br>')}</td>
+      <td>${row.schrack.replace(/\n/g,'<br>')}</td>
+      <td>${row.abb.replace(/\n/g,'<br>')}</td>
+      <td>${row.schneider.replace(/\n/g,'<br>')}</td>
+      <td>${row.mybox.replace(/\n/g,'<br>')}</td>
+      <td class="notes-val ${hl}">${row.note || ''}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ====== TABS ======
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ====== COPY ======
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = `Zkopírováno: ${code}`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }).catch(() => {
+    // fallback
+    const el = document.createElement('textarea');
+    el.value = code; document.body.appendChild(el);
+    el.select(); document.execCommand('copy');
+    document.body.removeChild(el);
+  });
+}
+
+// ====== INIT ======
+renderXref(xrefData);
+renderProducts('all');
+renderSpecs();
+</script>
+</body>
+</html>
